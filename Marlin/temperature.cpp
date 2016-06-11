@@ -28,6 +28,10 @@
   #include "watchdog.h"
 #endif
 
+#ifdef MTWLED
+  #include "mtwled.h"
+#endif
+
 //===========================================================================
 //================================== macros =================================
 //===========================================================================
@@ -663,6 +667,12 @@ void manage_heater() {
     #endif
 
   } // Extruders Loop
+
+  #ifdef MTWLED
+    #ifndef MTWLED_disableheatup
+      MTWLEDTemp();
+    #endif
+  #endif
 
   #if HAS_AUTO_FAN
     if (ms > next_auto_fan_check_ms) { // only need to check fan state very infrequently
