@@ -201,11 +201,6 @@ extern volatile uint8_t buttons;  //an extended version of the last checked butt
 
 #include "utf_mapper.h"
 
-#if ENABLED(SHOW_BOOTSCREEN)
-  static void bootscreen();
-  static bool show_bootscreen = true;
-#endif
-
 #if ENABLED(LCD_PROGRESS_BAR)
   static millis_t progress_bar_ms = 0;
   #if PROGRESS_MSG_EXPIRE > 0
@@ -394,10 +389,6 @@ static void lcd_implementation_init(
     lcd.begin(LCD_WIDTH, LCD_HEIGHT);
   #endif
 
-  #if ENABLED(SHOW_BOOTSCREEN)
-    if (show_bootscreen) bootscreen();
-  #endif
-
   lcd_set_custom_characters(
     #if ENABLED(LCD_PROGRESS_BAR)
       progress_bar_set
@@ -452,8 +443,7 @@ unsigned lcd_print(char c) { return charset_mapper(c); }
     lcd.setCursor(indent, 2); lcd.print('\x02'); lcd_printPGM(PSTR( "------" ));  lcd.print('\x03');
   }
 
-  static void bootscreen() {
-    show_bootscreen = false;
+  void bootscreen() {
     byte top_left[8] = {
       B00000,
       B00000,
@@ -508,7 +498,7 @@ unsigned lcd_print(char c) { return charset_mapper(c); }
       if (strlen(STRING) <= LCD_WIDTH) { \
         lcd.setCursor((LCD_WIDTH - lcd_strlen_P(PSTR(STRING))) / 2, 3); \
         lcd_printPGM(PSTR(STRING)); \
-        delay(DELAY); \
+        safe_delay(DELAY); \
       } \
       else { \
         lcd_scroll(0, 3, PSTR(STRING), LCD_WIDTH, DELAY); \
@@ -526,7 +516,7 @@ unsigned lcd_print(char c) { return charset_mapper(c); }
         #ifdef STRING_SPLASH_LINE2
           CENTER_OR_SCROLL(STRING_SPLASH_LINE2, 2000);
         #else
-          delay(2000);
+          safe_delay(2000);
         #endif
       }
       else {
@@ -551,7 +541,7 @@ unsigned lcd_print(char c) { return charset_mapper(c); }
       //
       if (LCD_EXTRA_SPACE >= strlen(STRING_SPLASH_LINE2) + 1) {
         logo_lines(PSTR(" " STRING_SPLASH_LINE2));
-        delay(2000);
+        safe_delay(2000);
       }
       else {
         logo_lines(PSTR(""));
@@ -562,12 +552,29 @@ unsigned lcd_print(char c) { return charset_mapper(c); }
       // Show only the Marlin logo
       //
       logo_lines(PSTR(""));
-      delay(2000);
+      safe_delay(2000);
     #endif
-
+    lcd_set_custom_characters(
+    #if ENABLED(LCD_PROGRESS_BAR)
+      false
+    #endif
+    );
   }
 
 #endif // SHOW_BOOTSCREEN
+
+void lcd_kill_screen() {
+  lcd.setCursor(0, 0);
+  lcd_print(lcd_status_message);
+  #if LCD_HEIGHT < 4
+    lcd.setCursor(0, 2);
+  #else
+    lcd.setCursor(0, 2);
+    lcd_printPGM(PSTR(MSG_HALTED));
+    lcd.setCursor(0, 3);
+  #endif
+  lcd_printPGM(PSTR(MSG_PLEASE_RESET));
+}
 
 FORCE_INLINE void _draw_axis_label(AxisEnum axis, const char *pstr, bool blink) {
   if (blink)
@@ -735,7 +742,7 @@ static void lcd_implementation_status_screen() {
 
     lcd.setCursor(0, 2);
     lcd.print(LCD_STR_FEEDRATE[0]);
-    lcd.print(itostr3(feedrate_multiplier));
+    lcd.print(itostr3(feedrate_percentage));
     lcd.print('%');
 
     #if LCD_WIDTH > 19 && ENABLED(SDSUPPORT)
@@ -811,6 +818,30 @@ static void lcd_implementation_status_screen() {
 
   lcd_print(lcd_status_message);
 }
+
+#if ENABLED(LCD_INFO_MENU) || ENABLED(FILAMENT_CHANGE_FEATURE)
+
+  static void lcd_implementation_drawmenu_static(uint8_t row, const char* pstr, bool center=true, bool invert=false, const char *valstr=NULL) {
+    UNUSED(invert);
+    char c;
+    int8_t n = LCD_WIDTH;
+    lcd.setCursor(0, row);
+    if (center && !valstr) {
+      int8_t pad = (LCD_WIDTH - lcd_strlen_P(pstr)) / 2;
+      while (--pad >= 0) { lcd.print(' '); n--; }
+    }
+    while (n > 0 && (c = pgm_read_byte(pstr))) {
+      n -= lcd_print(c);
+      pstr++;
+    }
+    if (valstr) while (n > 0 && (c = *valstr)) {
+      n -= lcd_print(c);
+      valstr++;
+    }
+    while (n-- > 0) lcd.print(' ');
+  }
+
+#endif // LCD_INFO_MENU || FILAMENT_CHANGE_FEATURE
 
 static void lcd_implementation_drawmenu_generic(bool sel, uint8_t row, const char* pstr, char pre_char, char post_char) {
   char c;

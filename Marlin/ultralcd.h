@@ -40,6 +40,8 @@
   void lcd_setalertstatuspgm(const char* message);
   void lcd_reset_alert_level();
   bool lcd_detected(void);
+  void lcd_kill_screen();
+  void kill_screen(const char* lcd_msg);
 
   #if ENABLED(LCD_USE_I2C_BUZZER)
     void lcd_buzz(long duration, uint16_t freq);
@@ -52,7 +54,10 @@
   #if ENABLED(DOGLCD)
     extern int lcd_contrast;
     void set_lcd_contrast(int value);
+  #elif ENABLED(SHOW_BOOTSCREEN)
+    void bootscreen();
   #endif
+
 
   #define LCD_MESSAGEPGM(x) lcd_setstatuspgm(PSTR(x))
   #define LCD_ALERTMESSAGEPGM(x) lcd_setalertstatuspgm(PSTR(x))
@@ -61,30 +66,34 @@
   #define LCD_TIMEOUT_TO_STATUS 15000
 
   #if ENABLED(ULTIPANEL)
-    void lcd_buttons_update();
     extern volatile uint8_t buttons;  //the last checked buttons in a bit array.
+    void lcd_buttons_update();
+    void lcd_quick_feedback(); // Audible feedback for a button click - could also be visual
+    bool lcd_clicked();
+    void lcd_ignore_click(bool b=true);
+
+    #if ENABLED(FILAMENT_CHANGE_FEATURE)
+      void lcd_filament_change_show_message(FilamentChangeMessage message);
+    #endif // FILAMENT_CHANGE_FEATURE
+
   #else
     FORCE_INLINE void lcd_buttons_update() {}
   #endif
 
-  extern int plaPreheatHotendTemp;
-  extern int plaPreheatHPBTemp;
-  extern int plaPreheatFanSpeed;
-  extern int absPreheatHotendTemp;
-  extern int absPreheatHPBTemp;
-  extern int absPreheatFanSpeed;
-
-  extern bool cancel_heatup;
+  extern int preheatHotendTemp1;
+  extern int preheatBedTemp1;
+  extern int preheatFanSpeed1;
+  extern int preheatHotendTemp2;
+  extern int preheatBedTemp2;
+  extern int preheatFanSpeed2;
 
   #if ENABLED(FILAMENT_LCD_DISPLAY)
     extern millis_t previous_lcd_status_ms;
   #endif
-  void lcd_quick_feedback(); // Audible feedback for a button click - could also be visual
-  bool lcd_clicked();
-  void lcd_ignore_click(bool b=true);
+
   bool lcd_blink();
 
-  #if ENABLED(ULTIPANEL) && ENABLED(REPRAPWORLD_KEYPAD)
+  #if ENABLED(REPRAPWORLD_KEYPAD)
 
     #define REPRAPWORLD_BTN_OFFSET 0 // bit offset into buttons for shift register values
 
@@ -108,13 +117,25 @@
 
     #define REPRAPWORLD_KEYPAD_MOVE_Z_DOWN  (buttons_reprapworld_keypad & EN_REPRAPWORLD_KEYPAD_F3)
     #define REPRAPWORLD_KEYPAD_MOVE_Z_UP    (buttons_reprapworld_keypad & EN_REPRAPWORLD_KEYPAD_F2)
+    #define REPRAPWORLD_KEYPAD_MOVE_MENU    (buttons_reprapworld_keypad & EN_REPRAPWORLD_KEYPAD_F1)
     #define REPRAPWORLD_KEYPAD_MOVE_Y_DOWN  (buttons_reprapworld_keypad & EN_REPRAPWORLD_KEYPAD_DOWN)
     #define REPRAPWORLD_KEYPAD_MOVE_X_RIGHT (buttons_reprapworld_keypad & EN_REPRAPWORLD_KEYPAD_RIGHT)
     #define REPRAPWORLD_KEYPAD_MOVE_HOME    (buttons_reprapworld_keypad & EN_REPRAPWORLD_KEYPAD_MIDDLE)
     #define REPRAPWORLD_KEYPAD_MOVE_Y_UP    (buttons_reprapworld_keypad & EN_REPRAPWORLD_KEYPAD_UP)
     #define REPRAPWORLD_KEYPAD_MOVE_X_LEFT  (buttons_reprapworld_keypad & EN_REPRAPWORLD_KEYPAD_LEFT)
 
-  #endif //ULTIPANEL && REPRAPWORLD_KEYPAD
+    #define REPRAPWORLD_KEYPAD_PRESSED      (buttons_reprapworld_keypad & ( \
+                                              EN_REPRAPWORLD_KEYPAD_F3 | \
+                                              EN_REPRAPWORLD_KEYPAD_F2 | \
+                                              EN_REPRAPWORLD_KEYPAD_F1 | \
+                                              EN_REPRAPWORLD_KEYPAD_DOWN | \
+                                              EN_REPRAPWORLD_KEYPAD_RIGHT | \
+                                              EN_REPRAPWORLD_KEYPAD_MIDDLE | \
+                                              EN_REPRAPWORLD_KEYPAD_UP | \
+                                              EN_REPRAPWORLD_KEYPAD_LEFT) \
+                                            )
+
+  #endif // REPRAPWORLD_KEYPAD
 
   #if ENABLED(NEWPANEL)
 
