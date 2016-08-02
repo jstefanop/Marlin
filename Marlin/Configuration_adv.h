@@ -46,6 +46,8 @@
  */
 #define CONFIGURATION_ADV_H_VERSION 010100
 
+#include "Conditionals.h"
+
 // @section temperature
 
 //===========================================================================
@@ -74,8 +76,8 @@
  * If you get false positives for "Thermal Runaway" increase THERMAL_PROTECTION_HYSTERESIS and/or THERMAL_PROTECTION_PERIOD
  */
 #if ENABLED(THERMAL_PROTECTION_HOTENDS)
-  #define THERMAL_PROTECTION_PERIOD 40        // Seconds
-  #define THERMAL_PROTECTION_HYSTERESIS 4     // Degrees Celsius
+  #define THERMAL_PROTECTION_PERIOD 50        // Seconds
+  #define THERMAL_PROTECTION_HYSTERESIS 5     // Degrees Celsius
 
   /**
    * Whenever an M104 or M109 increases the target temperature the firmware will wait for the
@@ -95,7 +97,7 @@
  */
 #if ENABLED(THERMAL_PROTECTION_BED)
   #define THERMAL_PROTECTION_BED_PERIOD 20    // Seconds
-  #define THERMAL_PROTECTION_BED_HYSTERESIS 2 // Degrees Celsius
+  #define THERMAL_PROTECTION_BED_HYSTERESIS 4 // Degrees Celsius
 
   /**
    * Whenever an M140 or M190 increases the target temperature the firmware will wait for the
@@ -113,8 +115,8 @@
 #if ENABLED(PIDTEMP)
   // this adds an experimental additional term to the heating power, proportional to the extrusion speed.
   // if Kc is chosen well, the additional required power due to increased melting should be compensated.
-  //#define PID_EXTRUSION_SCALING
-  #if ENABLED(PID_EXTRUSION_SCALING)
+  #define PID_ADD_EXTRUSION_RATE
+  #if ENABLED(PID_ADD_EXTRUSION_RATE)
     #define DEFAULT_Kc (100) //heating power=Kc*(e_speed)
     #define LPQ_MAX_LEN 50
   #endif
@@ -208,7 +210,7 @@
 // extruder temperature is above/below EXTRUDER_AUTO_FAN_TEMPERATURE.
 // Multiple extruders can be assigned to the same pin in which case
 // the fan will turn on when any selected extruder is above the threshold.
-#define EXTRUDER_0_AUTO_FAN_PIN -1
+#define EXTRUDER_0_AUTO_FAN_PIN 6
 #define EXTRUDER_1_AUTO_FAN_PIN -1
 #define EXTRUDER_2_AUTO_FAN_PIN -1
 #define EXTRUDER_3_AUTO_FAN_PIN -1
@@ -557,13 +559,10 @@ const unsigned int dropsegments = 5; //everything with less than this number of 
 #define MAX_CMD_SIZE 96
 #define BUFSIZE 4
 
-// Transfer Buffer Size
-// To save 386 bytes of PROGMEM (and TX_BUFFER_SIZE+3 bytes of RAM) set to 0.
-// To buffer a simple "ok" you need 4 bytes.
-// For ADVANCED_OK (M105) you need 32 bytes.
-// For debug-echo: 128 bytes for the optimal speed.
-// Other output doesn't need to be that speedy.
-// :[0,2,4,8,16,32,64,128,256]
+// Set Transfer-Buffer-Size by uncommenting the next define. Default size is 32byte.
+// :[0,2,4,8,16,32,64,128,256]. To save 386byte of PROGMEM and (3 + TX_BUFFER_SIZE) bytes of RAM set TX_BUFFER_SIZE to 0
+// To buffer a simple "ok" you need 4 byte, for ADVANCED_OK/M105 you need 32 and for debug-echo: 128 byte to get the optimal speed.
+// Any other output does not need to be that speedy.
 #define TX_BUFFER_SIZE 0
 
 // Enable an emergency-command parser to intercept certain commands as they
@@ -796,4 +795,7 @@ const unsigned int dropsegments = 5; //everything with less than this number of 
 
 //#define EXPERIMENTAL_I2CBUS
 
-#endif // CONFIGURATION_ADV_H
+#include "Conditionals.h"
+#include "SanityCheck.h"
+
+#endif //CONFIGURATION_ADV_H
