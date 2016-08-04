@@ -51,8 +51,6 @@
  */
 #define CONFIGURATION_H_VERSION 010100
 
-#include "boards.h"
-#include "macros.h"
 
 //===========================================================================
 //============================= Getting Started =============================
@@ -86,11 +84,6 @@
 
 // @section info
 
-#if ENABLED(USE_AUTOMATIC_VERSIONING)
-  #include "_Version.h"
-#else
-  #include "Version.h"
-#endif
 
 // User-specified version info of this build to display in [Pronterface, etc] terminal window during
 // startup. Implementation of an idea by Prof Braino to inform user that any changes made to this
@@ -112,9 +105,6 @@
 // example configuration folder.
 //
 //#define SHOW_CUSTOM_BOOTSCREEN
-#if ENABLED(SHOW_BOOTSCREEN) && ENABLED(SHOW_CUSTOM_BOOTSCREEN)
-  #include "_Bootscreen.h"
-#endif
 
 // @section machine
 
@@ -504,6 +494,12 @@
 // X and Y axis travel speed (mm/m) between probes
 #define XY_PROBE_SPEED 8000
 
+// Speed for the first approach when double-probing (with PROBE_DOUBLE_TOUCH)
+#define Z_PROBE_SPEED_FAST HOMING_FEEDRATE_Z
+// Speed for the "accurate" probe of each point
+#define Z_PROBE_SPEED_SLOW (Z_PROBE_SPEED_FAST / 2)
+// Use double touch for probing
+//#define PROBE_DOUBLE_TOUCH
 //
 // Allen Key Probe is defined in the Delta example configurations.
 //
@@ -760,7 +756,9 @@
  * MOVEMENT SETTINGS
  */
 
-#define HOMING_FEEDRATE {50*60, 50*60, 4*60, 0}  // set the homing speeds (mm/min)
+// Homing speeds (mm/m)
+#define HOMING_FEEDRATE_XY (50*60)
+#define HOMING_FEEDRATE_Z  (4*60)
 
 // default settings
 
@@ -1333,7 +1331,5 @@
   //#define FILAMENT_LCD_DISPLAY
 #endif
 
-#include "Configuration_adv.h"
-#include "thermistortables.h"
 
 #endif //CONFIGURATION_H
