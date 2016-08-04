@@ -1,6 +1,14 @@
-# Marlin 3D Printer Firmware
+# Marlin 3D Printer Firmware modified for the Maker's Tool Works Create
 
 <img align="top" width=175 src="buildroot/share/pixmaps/logo/marlin-250.png" />
+
+Start GCODE for MTW Create in slicer software is now
+
+G28; Home all axes
+G29; Start ABL
+M206 Zx.xx; Z offset value. A larger number makes the nozzle closer to the glass
+
+where x.xx offset value is obtained by following instructions here: http://www.manula.com/manuals/maker-s-tool-works/mtw-create-assembly-guide/1/en/topic/calibrating-the-abl  (make sure you keep the M206 and NOT the G92 command thats in the instructions)
 
 Additional documentation can be found at [The Marlin Documentation Project](https://www.marlinfw.org/).
 Please test this firmware and inform us if it misbehaves in any way, volunteers are standing by!
