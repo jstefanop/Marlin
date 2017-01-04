@@ -4,13 +4,14 @@
 
 Start GCODE for MTW Create in slicer software is now
 
-M851 Z-x.xx; Z offset value. A larger number makes the nozzle closer to the glass
-M420 Z10; Slowly reduces Z corrections over 1cm (needed due to the mesh based bilinear ABL enabled in this firmware)
-G28; Home all axes
-G29; Start ABL
-M905 K36; K factor for linear advanced extrusion tuned for PLA on the Create. Drastically increases print quality especially around corners. This value needs to be increased for softer materials like ABS...see here for tuning insturctions: http://marlinfw.org/docs/features/lin_advance.html
+M851 Z-x.xx;  Z offset value. A larger number makes the nozzle closer to the glass
+M420 Z10;  Slowly reduces Z corrections over 1cm (needed due to the mesh based bilinear ABL enabled in this firmware)
+G28;  Home all axes
+G29;  Start ABL
+M905 K36;  K factor for linear advanced extrusion tuned for PLA on the Create. Drastically increases print quality especially around corners. This value needs to be increased for softer materials like ABS...see here for tuning insturctions: http://marlinfw.org/docs/features/lin_advance.html
 
 where x.xx offset value is obtained by following instructions here: http://www.manula.com/manuals/maker-s-tool-works/mtw-create-assembly-guide/1/en/topic/calibrating-the-abl  (make sure you keep the M851 and NOT the G92 command thats in the instructions)
+
 __Not for production use – use with caution!__
 
 You can download earlier versions of Marlin on the [Releases page](https://github.com/MarlinFirmware/Marlin/releases). (The latest "stable" release of Marlin is 1.0.2-1.)
